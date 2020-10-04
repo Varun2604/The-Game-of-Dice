@@ -62,11 +62,6 @@ func (l *Log) Score(player string) int {
 	return l.playerScore[player]
 }
 
-//CanPlay returns true if the player can play the next turn
-func (l *Log) SkipChance(player string) bool {
-	return ContainsStr(l.rankOrder, player)
-}
-
 //updatePlayerScore updates the player's current score
 func (l *Log) updatePlayerScore(player string, currentRollScore int) int {
 	score, ok := l.playerScore[player]
