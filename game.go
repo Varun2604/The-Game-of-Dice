@@ -27,7 +27,7 @@ func startGame() {
 
 	printMessage("The game has ended.")
 	printMessage("Ranks of all players are as below:")
-	printMessage(strings.Join(gameLog.Ranks(), "\n"))
+	printScoreBoard(gameLog.ScoreBoard())
 }
 
 func playGame(gameInputs *Inputs, log *Log) {
@@ -39,36 +39,55 @@ func playGame(gameInputs *Inputs, log *Log) {
 				false) //TODO Does it matter if the user dosent type r ?
 			playTurn(player, log)
 		}
+		printScoreBoard(log.ScoreBoard())
 	}
 }
 
-func playTurn(player string, log *Log) {
-	rollScore := 6
-	for continueTurn(rollScore,
-		log.Score(player), log.inputs.maxScore) {
+func printScoreBoard(board []PlayersScorePair) {
+	printMessage("***********+Score Board+***********")
+	for i, b := range board {
+		printMessage("Rank %d - \"%s\" with score %d", (i + 1), strings.Join(b.players, ", "), b.score)
+	}
+	printMessage("***********************************")
+}
 
+func playTurn(player string, log *Log) {
+	rollScore := 0
+	won := hasWon(log.Score(player), log.inputs.maxScore)
+	continueTurn := !won
+	for continueTurn {
 		if !skipTurn(log.LastTwoRolls(player)) {
 			printMessage("Rolling for %s", player)
 			rollScore = Roll(DICE_MIN, DICS_MAX)
-			printMessage("%s you have rolled %d", player, rollScore)
+			printMessage("%s, you have rolled %d", player, rollScore)
 		} else {
-			printMessage("Skipping turn for %s", player)
+			printMessage("Skipping turn for %s since the last two roll score was 1", player)
 			rollScore = 0
 		}
-
 		log.RecordScore(player, rollScore)
+		playAgain := playAgain(rollScore)
+		continueTurn = !hasWon(log.Score(player), log.inputs.maxScore) && playAgain
+		if playAgain {
+			printMessage("%s gets another roll since the last score was 6", player)
+		}
+	}
+	if won {
+		printMessage("%s has completed the game, skipping round", player)
 	}
 }
 
 //continueTurn returns true if the turn is supposed to be continued
 // condition - 1. checks the total score of the player
-// condition - 2. checks if the last roll score is 6
-func continueTurn(lastRollScore int,
-	playerTotalScore int, maxPossibleScore int) bool {
-	return ((playerTotalScore < maxPossibleScore) &&
-		lastRollScore == 6)
+func playAgain(lastRollScore int) bool {
+	return (lastRollScore == 6)
 }
 
+//hasWon checks of the player has won the game
+func hasWon(playerTotalScore int, maxPossibleScore int) bool {
+	return !(playerTotalScore < maxPossibleScore)
+}
+
+//skipTurn checks if the player has to skip turn
 func skipTurn(lastTwoRolls []int) bool {
 	return EqualsIntArr(lastTwoRolls, CANCEL_IF_LAST_TWO_ROLLS)
 }

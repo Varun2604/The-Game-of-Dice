@@ -32,16 +32,24 @@ func NewGameInputs(totPlayers int, maxScore int) *Inputs {
 	}
 }
 
+type PlayersScorePair struct {
+	players []string
+	score   int
+}
+
 //Log logs the ongoings of the game
 type Log struct {
 	rankOrder          []string
 	lastTwoPlayerRolls map[string][2]int
 	playerScore        map[string]int
 	inputs             *Inputs
+	scoreBoard         []PlayersScorePair
+	scoreUpdated       bool
 }
 
 //RecordScore records the player's roll score
 func (l *Log) RecordScore(player string, rollScore int) {
+	l.scoreUpdated = true
 	l.updateLastRoll(player, rollScore)
 	latestScore := l.updatePlayerScore(player, rollScore)
 	if latestScore >= l.inputs.maxScore {
@@ -100,6 +108,44 @@ func (l *Log) Ranks() []string {
 	ranks := []string{} //do not return the ref to the actual score
 	ranks = append(ranks, l.rankOrder...)
 	return ranks
+}
+
+//ScoreBoard calculates and returns the current scoreboard
+func (l *Log) ScoreBoard() []PlayersScorePair {
+	if !l.scoreUpdated {
+		return l.scoreBoard
+	}
+
+	scoreToPlayers := make(map[int][]string)
+	scores := []int{}
+	for p, s := range l.playerScore {
+		players, ok := scoreToPlayers[s]
+		if !ok {
+			players = []string{}
+		}
+		players = append(players, p)
+		scoreToPlayers[s] = players
+		if !ContainsInt(scores, s) {
+			scores = append(scores, s)
+		}
+	}
+	sortedScores := SortIntDesc(scores)
+	scoreBoard := []PlayersScorePair{}
+	//TODO - n^2 order, can be reduced ??
+	for i, s := range sortedScores {
+		if i == 0 && s >= l.inputs.maxScore {
+			// append all the players who have completed the game to the scoreBoard
+			rankedPlayers := l.Ranks()
+			for _, p := range rankedPlayers {
+				scoreBoard = append(scoreBoard, PlayersScorePair{[]string{p}, l.playerScore[p]})
+			}
+		} else if s < l.inputs.maxScore {
+			scoreBoard = append(scoreBoard, PlayersScorePair{scoreToPlayers[s], s})
+		}
+	}
+	l.scoreBoard = scoreBoard
+	l.scoreUpdated = false
+	return scoreBoard
 }
 
 //NewGameLog returns a new game log instance

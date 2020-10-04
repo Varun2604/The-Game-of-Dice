@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"sort"
 )
 
 //readInput reads the input for a given prompt
@@ -54,6 +55,21 @@ func IndexOfStr(arr []string, ele string) int {
 	return -1
 }
 
+//ContainsInt returns true if the given element is a part of the array
+func ContainsInt(arr []int, ele int) bool {
+	return IndexOfInt(arr, ele) != -1
+}
+
+//IndexOfStr returns the index of ele in the str array, else -1
+func IndexOfInt(arr []int, ele int) int {
+	for i, str := range arr {
+		if str == ele {
+			return i
+		}
+	}
+	return -1
+}
+
 //EqualsIntArr compares all elements of int arr a and b
 func EqualsIntArr(a []int, b []int) bool {
 	if len(a) != len(b) {
@@ -75,4 +91,12 @@ func Roll(min int, max int) int {
 	}
 	max += 1 // since rand.Intn dosent include the max value
 	return rand.Intn(max-min) + min
+}
+
+//SortInt sorts and returns the array in decending
+func SortIntDesc(arr []int) []int {
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i] > arr[j]
+	})
+	return arr
 }

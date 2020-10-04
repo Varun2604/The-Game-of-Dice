@@ -29,19 +29,34 @@ func TestSkipTurn(t *testing.T) {
 	}
 }
 
-func TestContinueTurn(t *testing.T) {
+func TestPlayAgain(t *testing.T) {
 	inputs := [][]int{
-		{6, 1, 3},
-		{6, 2, 2},
-		{6, 3, 2},
-		{1, 1, 3},
-		{1, 2, 2},
-		{1, 3, 2},
+		{6},
+		{1},
+		{2},
+		{3},
+		{6},
 	}
-	expOp := []bool{true, false, false, false, false, false}
+	expOp := []bool{true, false, false, false, true}
 	for i, inp := range inputs {
-		if expOp[i] != continueTurn(inp[0], inp[1], inp[2]) {
-			t.Errorf("continueTurn mis functions for inputs %v with op %v", inp, expOp[i])
+		if expOp[i] != playAgain(inp[0]) {
+			t.Errorf("playAgain mis functions for inputs %v with op %v", inp, expOp[i])
+		}
+	}
+}
+
+func TestHasWon(t *testing.T) {
+	inputs := [][]int{
+		{6, 1},
+		{1, 6},
+		{10, 100},
+		{1, 1},
+		{6, 6},
+	}
+	expOp := []bool{true, false, false, true, true}
+	for i, inp := range inputs {
+		if expOp[i] != hasWon(inp[0], inp[1]) {
+			t.Errorf("hasWon mis functions for inputs %v with op %v", inp, expOp[i])
 		}
 	}
 }
