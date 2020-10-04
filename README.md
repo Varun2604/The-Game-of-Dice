@@ -52,3 +52,6 @@ The code is divided into 3 modules : <br>
 
 Sample output is as below :-
 ![output image](./output.jpg "Sampe output")
+
+Test case execution result is as below :-
+![output image](./tests_op.png "Sampe output")
