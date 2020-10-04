@@ -94,7 +94,7 @@ func skipTurn(lastTwoRolls []int) bool {
 
 //continueRound returns true if the round is supposed to be continued
 func continueRound(playerRanks []string, totalPlayers int) bool {
-	return ((len(playerRanks) + 1) < totalPlayers)
+	return (len(playerRanks) < totalPlayers)
 }
 
 //initGame fetch the game variables

@@ -5,7 +5,7 @@ import "testing"
 func TestContinueRound(t *testing.T) {
 	rankedPlayers := []string{"A", "B"}
 	totalPlayerInputs := []int{4, 3, 2}
-	expOp := []bool{true, false, false}
+	expOp := []bool{true, true, false}
 	for i, totalPlayers := range totalPlayerInputs {
 		if expOp[i] != continueRound(rankedPlayers, totalPlayers) {
 			t.Errorf("Contiue round dosen't work when player count is %d and ranked players - %v",
