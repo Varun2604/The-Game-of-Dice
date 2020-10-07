@@ -47,46 +47,46 @@ func TestLog(t *testing.T) {
 	})
 
 	t.Run("Test log.ScoreBoard()", func(T *testing.T) {
-		scoreBoard := log.ScoreBoard()
-		if len(scoreBoard) != 1 {
+		rankList := log.ScoreBoard()
+		if len(rankList) != 1 {
 			t.Error("log.ScoreBoard malfunctioning - records scores of un played players")
 		}
 		log.RecordScore(player2, 1)
-		scoreBoard = log.ScoreBoard()
-		if len(scoreBoard) != 2 {
+		rankList = log.ScoreBoard()
+		if len(rankList) != 2 {
 			t.Error("log.ScoreBoard malfunctioning - dosen't record scores of all players")
 		}
-		player1Score := scoreBoard[0]
-		if !ContainsStr(player1Score.players, player1) {
+		player1Score := rankList[0]
+		if player1Score.Player() != player1 {
 			t.Error("log.ScoreBoard malfunctioning - invalid rank computation")
 		}
-		if player1Score.score != 12 {
+		if player1Score.Score() != 12 {
 			t.Error("log.ScoreBoard malfunctioning - invalid score computation")
 		}
-		if scoreBoard[1].score != 1 {
+		if rankList[1].Score() != 1 {
 			t.Error("log.ScoreBoard malfunctioning - invalid score computation for last played")
 		}
 		//TODO test case to check scoreboard copy
 	})
-	t.Run("Test log.Ranks()", func(T *testing.T) {
+	t.Run("Test log.RankedPlayerCount()", func(T *testing.T) {
 		log.RecordScore(player1, 4)
-		if len(log.Ranks()) != 1 || !ContainsStr(log.Ranks(), player1) {
+		if log.RankedPlayerCount() != 1 {
 			t.Error("log.Ranks malfunctioning")
 		}
 	})
 	t.Run("Test log.ScoreBoard after max score", func(T *testing.T) {
-		scoreBoard := log.ScoreBoard()
-		if len(scoreBoard) != 2 {
+		rankList := log.ScoreBoard()
+		if len(rankList) != 2 {
 			t.Error("log.ScoreBoard malfunctioning - dosen't record scores of all players")
 		}
-		player1Score := scoreBoard[0]
-		if !ContainsStr(player1Score.players, player1) {
+		player1Score := rankList[0]
+		if player1Score.Player() != player1 && player1Score.Rank() != 1 {
 			t.Error("log.ScoreBoard malfunctioning - invalid rank computation")
 		}
-		if player1Score.score != 16 {
+		if player1Score.Score() != 16 {
 			t.Error("log.ScoreBoard malfunctioning - invalid score computation")
 		}
-		if scoreBoard[1].score != 1 {
+		if rankList[1].Score() != 1 {
 			t.Error("log.ScoreBoard malfunctioning - invalid score computation for last played")
 		}
 	})
