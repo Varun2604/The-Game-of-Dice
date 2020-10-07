@@ -3,13 +3,13 @@ package main
 import "testing"
 
 func TestContinueRound(t *testing.T) {
-	rankedPlayers := []string{"A", "B"}
+	rankedPlayersCount := 2
 	totalPlayerInputs := []int{4, 3, 2}
 	expOp := []bool{true, true, false}
 	for i, totalPlayers := range totalPlayerInputs {
-		if expOp[i] != continueRound(rankedPlayers, totalPlayers) {
-			t.Errorf("Contiue round dosen't work when player count is %d and ranked players - %v",
-				totalPlayers, rankedPlayers)
+		if expOp[i] != continueRound(rankedPlayersCount, totalPlayers) {
+			t.Errorf("Contiue round dosen't work when player count is %d and ranked players count - %d",
+				totalPlayers, rankedPlayersCount)
 		}
 	}
 }

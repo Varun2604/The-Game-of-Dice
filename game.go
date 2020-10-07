@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"strings"
 )
 
 const (
@@ -33,7 +32,7 @@ func startGame() {
 func playGame(gameInputs *Inputs, log *Log) {
 
 	players := gameInputs.ListPlayers()
-	for continueRound(log.Ranks(), gameInputs.totPlayers) {
+	for continueRound(log.RankedPlayerCount(), gameInputs.totPlayers) {
 		for _, player := range players {
 			readInput(fmt.Sprintf("%s its your turn (press ‘r’ to roll the dice)", player),
 				false) //TODO Does it matter if the user dosent type r ?
@@ -43,10 +42,10 @@ func playGame(gameInputs *Inputs, log *Log) {
 	}
 }
 
-func printScoreBoard(board []PlayersScorePair) {
+func printScoreBoard(rankList []RankedListNode) {
 	printMessage("***********+Score Board+***********")
-	for i, b := range board {
-		printMessage("Rank %d - \"%s\" with score %d", (i + 1), strings.Join(b.players, ", "), b.score)
+	for i, ele := range rankList {
+		printMessage("Rank %d - \"%s\" with score %d", (i + 1), ele.Player(), ele.Score())
 	}
 	printMessage("***********************************")
 }
@@ -93,8 +92,8 @@ func skipTurn(lastTwoRolls []int) bool {
 }
 
 //continueRound returns true if the round is supposed to be continued
-func continueRound(playerRanks []string, totalPlayers int) bool {
-	return (len(playerRanks) < totalPlayers)
+func continueRound(rankedPlayersCount, totalPlayers int) bool {
+	return (rankedPlayersCount < totalPlayers)
 }
 
 //initGame fetch the game variables

@@ -100,3 +100,103 @@ func SortIntDesc(arr []int) []int {
 	})
 	return arr
 }
+
+//PlayerRankedList Stores the player rank list
+//Does insert operations in O(log(n)) complexity
+//Quite useful to use this DS when the rank of the
+type RankedListNode interface {
+	//Rank returns a valid rank else -1
+	Rank() int
+	//SetRank Lets you update the rank of the current node if the score criteria is met
+	SetRank(int)
+	//Score returns a valid score else -1
+	Score() int
+	Equal(interface{}) bool
+	Player() string
+}
+
+type PlayerRankedList struct {
+	arr               []RankedListNode
+	size              int
+	latestRank        int
+	maxScore          int
+	rankedPlayerCount int
+}
+
+func (l *PlayerRankedList) Insert(node RankedListNode) {
+	l.size += 1
+	l.arr = append(l.arr, node)
+	l.orderArr(l.size)
+}
+
+func (l *PlayerRankedList) InsertOrUpdate(node RankedListNode) {
+	//find index of the element, and update rank from that element
+	updatedIdx := -1
+	for i, n := range l.arr {
+		if n.Equal(node) {
+			if node.Score() >= l.maxScore {
+				node.SetRank(l.latestRank)
+				l.latestRank += 1
+				l.rankedPlayerCount += 1
+			}
+			l.arr[i] = node
+			updatedIdx = i
+			break
+		}
+	}
+	if updatedIdx == -1 {
+		//the node is not present in the array, insert it
+		l.Insert(node)
+		return
+	}
+	l.orderArr(updatedIdx)
+}
+
+// Traverse up and fix violated property
+func (l *PlayerRankedList) orderArr(current int) {
+	for l.greater(l.arr[current], l.arr[l.parent(current)]) {
+		l.swap(current, l.parent(current))
+		current = l.parent(current)
+	}
+}
+
+func (l *PlayerRankedList) swap(fpos, spos int) {
+	tmp := l.arr[fpos]
+	l.arr[fpos] = l.arr[spos]
+	l.arr[spos] = tmp
+}
+
+func (l *PlayerRankedList) parent(pos int) int {
+	return pos / 2
+}
+
+func (l *PlayerRankedList) greater(lNode, rNode RankedListNode) bool {
+	//when ranks are set, compare with ranks
+	if (lNode.Rank() != -1) && (rNode.Rank() != -1) {
+		return (lNode.Rank() < rNode.Rank())
+	}
+	//if no ranks, compare with score
+	return (lNode.Score() > rNode.Score())
+}
+
+//List returns the list
+func (l *PlayerRankedList) List() []RankedListNode {
+	//TODO - return a copy of the array to avoid mutation
+	return l.arr
+}
+
+//RankedPlayersCount returns the count of ranked players
+func (l *PlayerRankedList) RankedPlayersCount() int {
+	//TODO - return a copy of the array to avoid mutation
+	return l.rankedPlayerCount
+}
+
+func NewRankedList(maxScore int) *PlayerRankedList {
+	return &PlayerRankedList{
+		arr:               []RankedListNode{},
+		size:              -1,
+		latestRank:        1,
+		maxScore:          maxScore,
+		rankedPlayerCount: 0,
+	}
+}
