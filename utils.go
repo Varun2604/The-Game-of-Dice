@@ -83,6 +83,19 @@ func EqualsIntArr(a []int, b []int) bool {
 	return true
 }
 
+//EqualsStrArr compares all elements of int arr a and b
+func EqualsStrArr(a []string, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, val := range a {
+		if b[i] != val {
+			return false
+		}
+	}
+	return true
+}
+
 //Roll returns an integer in between min and max, inclusive of max
 //returns -1 in case of an invalid input
 func Roll(min int, max int) int {
@@ -101,9 +114,6 @@ func SortIntDesc(arr []int) []int {
 	return arr
 }
 
-//PlayerRankedList Stores the player rank list
-//Does insert operations in O(log(n)) complexity
-//Quite useful to use this DS when the rank of the
 type RankedListNode interface {
 	//Rank returns a valid rank else -1
 	Rank() int
@@ -115,6 +125,9 @@ type RankedListNode interface {
 	Player() string
 }
 
+//PlayerRankedList Stores the player rank list
+//Does insert operations in O(Log(n)) complexity (complexity in building the heap)
+//Does list operation in O(nLog(n)) complexity (does lazy sorting)
 type PlayerRankedList struct {
 	arr               []RankedListNode
 	size              int
@@ -126,7 +139,7 @@ type PlayerRankedList struct {
 func (l *PlayerRankedList) Insert(node RankedListNode) {
 	l.size += 1
 	l.arr = append(l.arr, node)
-	l.orderArr(l.size)
+	l.orderHeap(l.size)
 }
 
 func (l *PlayerRankedList) InsertOrUpdate(node RankedListNode) {
@@ -144,19 +157,59 @@ func (l *PlayerRankedList) InsertOrUpdate(node RankedListNode) {
 			break
 		}
 	}
+
 	if updatedIdx == -1 {
 		//the node is not present in the array, insert it
 		l.Insert(node)
 		return
 	}
-	l.orderArr(updatedIdx)
+	l.orderHeap(updatedIdx)
 }
 
 // Traverse up and fix violated property
-func (l *PlayerRankedList) orderArr(current int) {
+func (l *PlayerRankedList) orderHeap(current int) {
 	for l.greater(l.arr[current], l.arr[l.parent(current)]) {
 		l.swap(current, l.parent(current))
 		current = l.parent(current)
+	}
+}
+
+// Do heap sort
+func (l *PlayerRankedList) sort() {
+	for i := l.size; i > 0; i-- {
+		// Move current root to end
+		l.swap(0, i)
+
+		// call max heapify on the reduced heap
+		l.heapify(0, i)
+	}
+	//rearrange in max heap format (reverse the array)
+	for i := 0; i < ((l.size + 1) / 2); i++ {
+		l.swap(i, (l.size - i))
+	}
+}
+
+//heapify the array
+func (l *PlayerRankedList) heapify(from int, to int) {
+	largest := from          // Initialize largest as root
+	lIdx := ((2 * from) + 1) // left = 2*i + 1
+	rIdx := ((2 * from) + 2) // right = 2*i + 2
+
+	// If left child is larger than root
+	if (lIdx < to) && l.greater(l.arr[lIdx], l.arr[largest]) {
+		largest = lIdx
+	}
+
+	// If right child is larger than largest so far
+	if (rIdx < to) && l.greater(l.arr[rIdx], l.arr[largest]) {
+		largest = rIdx
+	}
+
+	// If largest is not root
+	if largest != from {
+		l.swap(from, largest)
+		// Recursively heapify the affected sub-tree
+		l.heapify(largest, to)
 	}
 }
 
@@ -172,7 +225,7 @@ func (l *PlayerRankedList) parent(pos int) int {
 
 func (l *PlayerRankedList) greater(lNode, rNode RankedListNode) bool {
 	//when ranks are set, compare with ranks
-	if (lNode.Rank() != -1) && (rNode.Rank() != -1) {
+	if (lNode.Rank() > 0) && (rNode.Rank() > 0) {
 		return (lNode.Rank() < rNode.Rank())
 	}
 	//if no ranks, compare with score
@@ -182,6 +235,7 @@ func (l *PlayerRankedList) greater(lNode, rNode RankedListNode) bool {
 //List returns the list
 func (l *PlayerRankedList) List() []RankedListNode {
 	//TODO - return a copy of the array to avoid mutation
+	l.sort()
 	return l.arr
 }
 
