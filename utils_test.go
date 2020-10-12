@@ -81,3 +81,118 @@ func TestRoll(t *testing.T) {
 		t.Error("Roll malfunctions when max < 0")
 	}
 }
+
+func TestPlayerRankedList(t *testing.T) {
+	test := func(l *PlayerRankedList, expectedRankList []string) {
+		ranklist := make([]string, 6)
+		for i, r := range l.List() {
+			ranklist[i] = r.Player()
+		}
+		if !EqualsStrArr(expectedRankList, ranklist) {
+			t.Fatalf("o/p is %v, expected is %v", ranklist, expectedRankList)
+		}
+	}
+	l := NewRankedList(20)
+	p1 := &PlayerScoreDetail{
+		player: "player 1", score: 10,
+	}
+	p2 := &PlayerScoreDetail{
+		player: "player 2", score: 6,
+	}
+	p3 := &PlayerScoreDetail{
+		player: "player 3", score: 4,
+	}
+	p4 := &PlayerScoreDetail{
+		player: "player 4", score: 8,
+	}
+	p5 := &PlayerScoreDetail{
+		player: "player 5", score: 9,
+	}
+	p6 := &PlayerScoreDetail{
+		player: "player 6", score: 7,
+	}
+	l.InsertOrUpdate(p1)
+	l.InsertOrUpdate(p2)
+	l.InsertOrUpdate(p3)
+	l.InsertOrUpdate(p4)
+	l.InsertOrUpdate(p5)
+	l.InsertOrUpdate(p6)
+
+	expectedRankList := []string{"player 1", "player 5", "player 4", "player 6",
+		"player 2", "player 3"}
+	t.Run("Test List with only inserted valid scores", func(t *testing.T) {
+		test(l, expectedRankList)
+	})
+
+	p4.score = 11
+	l.InsertOrUpdate(p4)
+	expectedRankList = []string{"player 4", "player 1", "player 5", "player 6",
+		"player 2", "player 3"}
+	t.Run("Test List with updated valid scores", func(t *testing.T) {
+		test(l, expectedRankList)
+		if l.RankedPlayersCount() != 0 {
+			t.Fatalf("invalid value for ranked player count - %d", l.RankedPlayersCount())
+		}
+	})
+
+	p5.score = 21
+	l.InsertOrUpdate(p5)
+	expectedRankList = []string{"player 5", "player 4", "player 1", "player 6",
+		"player 2", "player 3"}
+	t.Run("Test List having assigning player with rank", func(t *testing.T) {
+		test(l, expectedRankList)
+		if l.RankedPlayersCount() != 1 {
+			t.Fatalf("invalid value for ranked player count - %d", l.RankedPlayersCount())
+		}
+	})
+
+	p1.score = 13
+	l.InsertOrUpdate(p1)
+	expectedRankList = []string{"player 5", "player 1", "player 4", "player 6",
+		"player 2", "player 3"}
+	t.Run("Test List having a player assigned a rank", func(t *testing.T) {
+		test(l, expectedRankList)
+	})
+
+	p6.score = 15
+	l.InsertOrUpdate(p6)
+	expectedRankList = []string{"player 5", "player 6", "player 1", "player 4",
+		"player 2", "player 3"}
+	t.Run("Test List having a player assigned a rank - 2", func(t *testing.T) {
+		test(l, expectedRankList)
+		if l.RankedPlayersCount() != 1 {
+			t.Fatalf("invalid value for ranked player count - %d", l.RankedPlayersCount())
+		}
+	})
+
+	p4.score = 23
+	l.InsertOrUpdate(p4)
+	expectedRankList = []string{"player 5", "player 4", "player 6", "player 1",
+		"player 2", "player 3"}
+	t.Run("Test List assigning 2nd player a rank", func(t *testing.T) {
+		test(l, expectedRankList)
+		if l.RankedPlayersCount() != 2 {
+			t.Fatalf("invalid value for ranked player count - %d", l.RankedPlayersCount())
+		}
+	})
+
+	p3.score = 16
+	l.InsertOrUpdate(p3)
+	expectedRankList = []string{"player 5", "player 4", "player 3", "player 6",
+		"player 1", "player 2"}
+	t.Run("Test List having two players assigned a rank", func(t *testing.T) {
+		test(l, expectedRankList)
+	})
+
+	p1.score = 17
+	l.InsertOrUpdate(p1)
+	expectedRankList = []string{"player 5", "player 4", "player 1", "player 3",
+		"player 6", "player 2"}
+	t.Run("Test List having two players assigned a rank", func(t *testing.T) {
+		test(l, expectedRankList)
+		if l.RankedPlayersCount() != 2 {
+			t.Fatalf("invalid value for ranked player count - %d", l.RankedPlayersCount())
+		}
+	})
+
+}
